@@ -1,11 +1,14 @@
 import dotenv from 'dotenv';
+import OpenAI from 'openai';
 import type { AIRecommendation, LegalCriteria } from '@zant/shared';
 
 dotenv.config();
 
-const HF_API_KEY = process.env.HF_API_KEY;
-const HF_MODEL = process.env.HF_MODEL || 'CYFRAGOVPL/PLLuM-12B-instruct';
-const AI_PROVIDER = process.env.AI_PROVIDER || 'huggingface';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+const AI_PROVIDER = process.env.AI_PROVIDER || 'openai';
+
+const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
 
 interface AccidentContext {
   description: string;
@@ -34,27 +37,33 @@ Przykłady BRAKU ZWIĄZKU:
 export async function analyzeAccidentReport(
   context: AccidentContext
 ): Promise<AIRecommendation> {
-  if (AI_PROVIDER === 'huggingface') {
-    return await analyzeWithHuggingFace(context);
+  if (AI_PROVIDER === 'openai' && openai) {
+    return await analyzeWithOpenAI(context);
   }
   
   // Fallback to mock analysis
   return mockAnalysis(context);
 }
 
-async function analyzeWithHuggingFace(
+async function analyzeWithOpenAI(
   context: AccidentContext
 ): Promise<AIRecommendation> {
-  const prompt = `${ZUS_LEGAL_CONTEXT}
+  const systemPrompt = `${ZUS_LEGAL_CONTEXT}
 
-ANALIZA ZGŁOSZENIA WYPADKU:
+Jesteś ekspertem ZUS analizującym zgłoszenia wypadków przy pracy. Analizuj według trzech kryteriów:
+1. Nagłość zdarzenia (Art. 12)
+2. Przyczyna zewnętrzna (Art. 13)
+3. Związek z działalnością gospodarczą (Art. 14)
 
-Opis wypadku: ${context.description}
+Zwróć odpowiedź WYŁĄCZNIE w formacie JSON bez dodatkowego tekstu.`;
+
+  const userPrompt = `Przeanalizuj zgłoszenie wypadku:
+
+Opis: ${context.description}
 Kontekst biznesowy: ${context.businessContext}
 Miejsce: ${context.location}
 
-Przeanalizuj to zgłoszenie według kryteriów ZUS i zwróć odpowiedź w formacie JSON:
-
+Zwróć JSON:
 {
   "verdict": "APPROVE" lub "REJECT" lub "AMBIGUOUS",
   "confidence": 0.0-1.0,
@@ -77,73 +86,53 @@ Przeanalizuj to zgłoszenie według kryteriów ZUS i zwróć odpowiedź w formac
   },
   "summary": "krótkie podsumowanie",
   "reasoning": ["punkt 1", "punkt 2", "punkt 3"]
-}
-
-Odpowiedź (tylko JSON):`;
+}`;
 
   try {
-    const response = await fetch(
-      `https://api-inference.huggingface.co/models/${HF_MODEL}`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${HF_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          inputs: prompt,
-          parameters: {
-            max_new_tokens: 1000,
-            temperature: 0.3,
-            return_full_text: false,
-          },
-        }),
-      }
-    );
+    const response = await openai!.chat.completions.create({
+      model: OPENAI_MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: 0.3,
+      response_format: { type: 'json_object' },
+    });
 
-    if (!response.ok) {
-      console.error('HuggingFace API error:', response.statusText);
+    const content = response.choices[0].message.content;
+    if (!content) {
+      console.error('Empty response from OpenAI');
       return mockAnalysis(context);
     }
 
-    const data = await response.json();
-    const generatedText = Array.isArray(data) ? data[0].generated_text : data.generated_text;
-
-    // Try to parse JSON from response
-    const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0]);
-      
-      return {
-        verdict: parsed.verdict || 'AMBIGUOUS',
-        confidence: parsed.confidence || 0.5,
-        criteria: {
-          suddenEvent: parsed.criteria?.suddenEvent || {
-            score: 0.5,
-            reasoning: 'Brak analizy',
-            citedArticle: 'Art. 12',
-          },
-          externalCause: parsed.criteria?.externalCause || {
-            score: 0.5,
-            reasoning: 'Brak analizy',
-            citedArticle: 'Art. 13',
-          },
-          businessConnection: parsed.criteria?.businessConnection || {
-            score: 0.5,
-            reasoning: 'Brak analizy',
-            citedArticle: 'Art. 14',
-          },
+    const parsed = JSON.parse(content);
+    
+    return {
+      verdict: parsed.verdict || 'AMBIGUOUS',
+      confidence: parsed.confidence || 0.5,
+      criteria: {
+        suddenEvent: parsed.criteria?.suddenEvent || {
+          score: 0.5,
+          reasoning: 'Brak analizy',
+          citedArticle: 'Art. 12',
         },
-        summary: parsed.summary || 'Analiza nie powiodła się',
-        reasoning: parsed.reasoning || ['Brak szczegółów'],
-        generatedAt: new Date(),
-      };
-    }
-
-    // Fallback if JSON parsing fails
-    return mockAnalysis(context);
+        externalCause: parsed.criteria?.externalCause || {
+          score: 0.5,
+          reasoning: 'Brak analizy',
+          citedArticle: 'Art. 13',
+        },
+        businessConnection: parsed.criteria?.businessConnection || {
+          score: 0.5,
+          reasoning: 'Brak analizy',
+          citedArticle: 'Art. 14',
+        },
+      },
+      summary: parsed.summary || 'Analiza zakończona',
+      reasoning: parsed.reasoning || [],
+      generatedAt: new Date(),
+    };
   } catch (error) {
-    console.error('Error calling HuggingFace API:', error);
+    console.error('Error calling OpenAI API:', error);
     return mockAnalysis(context);
   }
 }

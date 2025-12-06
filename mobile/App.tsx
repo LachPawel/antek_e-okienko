@@ -106,7 +106,8 @@ const ConversationScreen = () => {
   const submitAccidentReport = async () => {
     setIsSubmitting(true);
     
-    const apiUrl = 'http://localhost:3001';
+    // Use your Mac's local IP instead of localhost when testing on physical device
+    const apiUrl = 'http://172.20.10.4:3001';
     
     const report: Partial<AccidentReport> = {
       id: Date.now().toString(),
