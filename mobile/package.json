@@ -4,15 +4,28 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "start:tunnel": "expo start --tunnel",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "prebuild": "expo prebuild --clean",
+    "prebuild:ios": "expo prebuild --platform ios --clean",
+    "prebuild:android": "expo prebuild --platform android --clean"
   },
   "dependencies": {
     "expo": "~54.0.27",
     "expo-status-bar": "~3.0.9",
+    "expo-av": "~16.0.8",
+    "expo-constants": "~18.0.11",
     "react": "19.1.0",
-    "react-native": "0.81.5"
+    "react-native": "0.81.5",
+    "@elevenlabs/react-native": "^0.5.5",
+    "@livekit/react-native": "^2.9.5",
+    "@livekit/react-native-webrtc": "^137.0.2",
+    "@config-plugins/react-native-webrtc": "^10.0.0",
+    "@livekit/react-native-expo-plugin": "^1.0.0",
+    "livekit-client": "^2.16.0",
+    "@zant/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",

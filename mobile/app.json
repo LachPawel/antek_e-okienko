@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "ZANT - Zgłoszenie Wypadku",
+    "slug": "zant-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,17 +12,45 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "scheme": "zant",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "pl.hacknation.zant",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Aplikacja potrzebuje dostępu do mikrofonu do zgłaszania wypadków.",
+        "NSLocalNetworkUsageDescription": "Aplikacja potrzebuje dostępu do sieci lokalnej.",
+        "NSBonjourServices": [
+          "_tcp",
+          "_udp"
+        ]
+      },
+      "bitcode": false,
+      "appleTeamId": "8T43S264Q5"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "package": "pl.hacknation.zant",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.CAMERA",
+        "android.permission.INTERNET",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.WAKE_LOCK",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
+    "plugins": [
+      "@livekit/react-native-expo-plugin",
+      "@config-plugins/react-native-webrtc"
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
     }
