@@ -12,7 +12,6 @@ export default function App() {
   const [verdict, setVerdict] = useState<'APPROVE' | 'REJECT'>('APPROVE');
   const [notes, setNotes] = useState('');
 
-  // Fetch pending reports
   useEffect(() => {
     fetchPendingReports();
   }, []);
@@ -34,7 +33,6 @@ export default function App() {
     setAiAnalysis(null);
     setNotes('');
     
-    // Try to fetch existing analysis
     try {
       const response = await fetch(`${API_URL}/api/accidents/${report.id}`);
       const data: ApiResponse<any> = await response.json();
@@ -73,9 +71,7 @@ export default function App() {
     try {
       const response = await fetch(`${API_URL}/api/accidents/${selectedReport.id}/verdict`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           verdict,
           notes,
@@ -98,248 +94,440 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', fontFamily: 'system-ui, -apple-system, sans-serif', margin: 0, padding: 0 }}>
       {/* Header */}
-      <header className="bg-[#406835] text-white shadow-md border-b-4 border-[#659A41]">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+      <header style={{ 
+        backgroundColor: '#fff', 
+        borderBottom: '1px solid #e2e8f0',
+        padding: '0 32px',
+        height: '64px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        width: '100%',
+        boxSizing: 'border-box'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            width: '36px',
+            height: '36px',
+            backgroundColor: '#005226',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            fontWeight: 'bold',
+            fontSize: '16px'
+          }}>A</div>
           <div>
-            <h1 className="text-2xl font-bold tracking-wide">Antek E-Okienko</h1>
-            <p className="text-emerald-100 text-sm mt-0.5 font-light">Panel Urzędnika ZUS</p>
+            <div style={{ fontWeight: '600', fontSize: '16px', color: '#0f172a' }}>Antek</div>
+            <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Panel Urzędnika</div>
           </div>
-          <div className="bg-white/10 px-4 py-2 rounded text-sm font-medium">
-            System Wspierania Decyzji
-          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '14px', color: '#64748b' }}>Administrator</span>
+          <div style={{ width: '32px', height: '32px', backgroundColor: '#e2e8f0', borderRadius: '50%' }}></div>
         </div>
       </header>
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left: Reports List */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-bold text-gray-800">
-                  Oczekujące zgłoszenia <span className="ml-2 bg-[#406835] text-white text-xs px-2 py-1 rounded-full">{reports.length}</span>
-                </h2>
+      {/* Main Content */}
+      <main style={{ padding: '32px', height: 'calc(100vh - 64px)', boxSizing: 'border-box' }}>
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a', marginBottom: '8px', margin: 0, marginBottom: '8px' }}>
+            Centrum Decyzyjne
+          </h1>
+          <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px', margin: 0, marginBottom: '24px' }}>
+            Wybierz zgłoszenie, przeanalizuj i podejmij decyzję.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '32px', flex: 1, minHeight: 0 }}>
+            {/* Left Panel - Reports List */}
+            <div style={{ 
+              backgroundColor: '#fff', 
+              borderRadius: '12px', 
+              border: '1px solid #e2e8f0',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              <div style={{ 
+                padding: '16px 20px', 
+                borderBottom: '1px solid #e2e8f0',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexShrink: 0
+              }}>
+                <span style={{ fontWeight: '600', fontSize: '14px', color: '#0f172a' }}>Zgłoszenia</span>
+                <span style={{ 
+                  backgroundColor: '#f1f5f9', 
+                  padding: '4px 10px', 
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#475569'
+                }}>{reports.length}</span>
               </div>
               
-              {reports.length === 0 ? (
-                <p className="text-gray-500 text-center py-12">Brak nowych zgłoszeń</p>
-              ) : (
-                <div className="divide-y divide-gray-100">
-                  {reports.map((report) => (
-                    <button
+              <div style={{ flex: 1, overflowY: 'auto' }}>
+                {reports.length === 0 ? (
+                  <div style={{ padding: '60px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                    <div style={{ 
+                      width: '48px', 
+                      height: '48px', 
+                      backgroundColor: '#f1f5f9', 
+                      borderRadius: '12px',
+                      margin: '0 auto 16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                      </svg>
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: '500' }}>Brak zgłoszeń</div>
+                    <div style={{ fontSize: '12px', marginTop: '4px' }}>Wszystkie sprawy zostały rozpatrzone</div>
+                  </div>
+                ) : (
+                reports.map((report) => {
+                  const isActive = selectedReport?.id === report.id;
+                  return (
+                    <div
                       key={report.id}
                       onClick={() => handleSelectReport(report)}
-                      className={`w-full text-left p-4 transition-colors hover:bg-gray-50 ${
-                        selectedReport?.id === report.id
-                          ? 'bg-emerald-50 border-l-4 border-[#406835]'
-                          : 'border-l-4 border-transparent'
-                      }`}
+                      style={{
+                        padding: '16px 20px',
+                        borderBottom: '1px solid #f1f5f9',
+                        cursor: 'pointer',
+                        backgroundColor: isActive ? '#f0fdf4' : '#fff',
+                        borderLeft: isActive ? '3px solid #005226' : '3px solid transparent',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isActive) e.currentTarget.style.backgroundColor = '#f8fafc';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) e.currentTarget.style.backgroundColor = '#fff';
+                      }}
                     >
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="font-semibold text-gray-900 text-sm">#{report.id.slice(-6)}</span>
-                        <span className="text-xs text-gray-500">{new Date(report.createdAt).toLocaleDateString('pl-PL')}</span>
-                      </div>
-                      <div className="text-sm text-gray-700 font-medium mb-1">
+                      <div style={{ fontWeight: '500', fontSize: '14px', color: '#0f172a', marginBottom: '4px' }}>
                         {report.location}
                       </div>
-                      <div className="text-xs text-gray-500 truncate">
-                        {report.description}
+                      <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                        {new Date(report.createdAt).toLocaleDateString('pl-PL')} • #{report.id.slice(-4)}
                       </div>
-                    </button>
-                  ))}
-                </div>
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
 
-          {/* Right: Report Details */}
-          <div className="lg:col-span-2 space-y-6">
+          {/* Right Panel - Details */}
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             {!selectedReport ? (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-16 text-center">
-                <div className="text-6xl mb-6 opacity-20">📋</div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              <div style={{
+                backgroundColor: '#fff',
+                borderRadius: '12px',
+                border: '2px dashed #e2e8f0',
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  backgroundColor: '#f1f5f9', 
+                  borderRadius: '16px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2">
+                    <path d="M15 19l-7-7 7-7"/>
+                  </svg>
+                </div>
+                <div style={{ fontSize: '16px', color: '#64748b', fontWeight: '500' }}>
                   Wybierz zgłoszenie z listy
-                </h3>
-                <p className="text-gray-500">
-                  Wybierz sprawę z panelu po lewej stronie, aby rozpocząć proces weryfikacji.
-                </p>
+                </div>
+                <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '4px' }}>
+                  Kliknij na zgłoszenie aby zobaczyć szczegóły
+                </div>
               </div>
             ) : (
-              <>
-                {/* Report Details Card */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                  <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                    <h2 className="text-lg font-bold text-gray-800">
-                      Szczegóły zgłoszenia
-                    </h2>
-                    <span className="text-sm text-gray-500">ID: {selectedReport.id}</span>
-                  </div>
-                  
-                  <div className="p-6">
-                    <div className="grid grid-cols-2 gap-6 mb-6">
-                      <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Data zdarzenia</label>
-                        <p className="text-gray-900 font-medium">{new Date(selectedReport.dateTime).toLocaleString('pl-PL')}</p>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Miejsce</label>
-                        <p className="text-gray-900 font-medium">{selectedReport.location}</p>
-                      </div>
-                    </div>
-
-                    <div className="mb-6">
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Opis wypadku</label>
-                      <div className="bg-gray-50 p-4 rounded border border-gray-100 text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">
-                        {selectedReport.description}
-                      </div>
-                    </div>
-
-                    <div className="mb-6">
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Kontekst działalności</label>
-                      <p className="text-gray-900 text-sm">{selectedReport.businessContext}</p>
-                    </div>
-
-                    <button
-                      onClick={handleAnalyze}
-                      disabled={isAnalyzing}
-                      className="w-full bg-[#406835] hover:bg-[#2e4c25] text-white font-semibold py-3 px-6 rounded transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
-                    >
-                      {isAnalyzing ? (
-                        <>🔄 Trwa analiza...</>
-                      ) : (
-                        <>🤖 Uruchom analizę AI (PLLuM)</>
-                      )}
-                    </button>
-                  </div>
+              <div style={{ 
+                backgroundColor: '#fff', 
+                borderRadius: '12px', 
+                border: '1px solid #e2e8f0',
+                overflow: 'hidden',
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                {/* Green Header */}
+                <div style={{
+                  background: 'linear-gradient(135deg, #005226 0%, #059669 100%)',
+                  padding: '24px',
+                  color: '#fff'
+                }}>
+                  <div style={{ 
+                    display: 'inline-block',
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    padding: '4px 12px',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    marginBottom: '8px'
+                  }}>ZGŁOSZENIE #{selectedReport.id.slice(-6)}</div>
+                  <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>Analiza Wypadku</h2>
                 </div>
 
-                {/* AI Analysis Card */}
-                {aiAnalysis && (
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="bg-emerald-50 px-6 py-4 border-b border-emerald-100 flex justify-between items-center">
-                      <h2 className="text-lg font-bold text-[#406835]">
-                        Rekomendacja Systemu
-                      </h2>
-                      <div className="text-sm font-medium text-[#406835]">
-                        Pewność: {(aiAnalysis.confidence * 100).toFixed(0)}%
-                      </div>
+                <div style={{ padding: '24px', flex: 1, overflowY: 'auto' }}>
+                  {/* Info Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                    <div>
+                      <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Data</div>
+                      <div style={{ fontSize: '14px', color: '#0f172a' }}>{new Date(selectedReport.dateTime).toLocaleString('pl-PL')}</div>
                     </div>
-                    
-                    <div className="p-6">
-                      <div className={`p-4 rounded mb-6 flex items-center gap-4 ${
-                        aiAnalysis.verdict === 'APPROVE' 
-                          ? 'bg-green-50 border border-green-200 text-green-800'
-                          : aiAnalysis.verdict === 'REJECT'
-                          ? 'bg-red-50 border border-red-200 text-red-800'
-                          : 'bg-yellow-50 border border-yellow-200 text-yellow-800'
-                      }`}>
-                        <div className="text-3xl">
-                          {aiAnalysis.verdict === 'APPROVE' && '✅'}
-                          {aiAnalysis.verdict === 'REJECT' && '❌'}
-                          {aiAnalysis.verdict === 'AMBIGUOUS' && '⚠️'}
-                        </div>
-                        <div>
-                          <div className="font-bold text-lg">
-                            {aiAnalysis.verdict === 'APPROVE' && 'REKOMENDACJA: UZNAĆ'}
-                            {aiAnalysis.verdict === 'REJECT' && 'REKOMENDACJA: ODMÓWIĆ'}
-                            {aiAnalysis.verdict === 'AMBIGUOUS' && 'WYMAGA WERYFIKACJI'}
-                          </div>
-                          <div className="text-sm opacity-80">
-                            Na podstawie analizy kryteriów ustawowych
-                          </div>
-                        </div>
-                      </div>
+                    <div>
+                      <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Miejsce</div>
+                      <div style={{ fontSize: '14px', color: '#0f172a' }}>{selectedReport.location}</div>
+                    </div>
+                  </div>
 
-                      <div className="space-y-4">
-                        {[
-                          { label: 'Nagłość zdarzenia (Art. 12)', data: aiAnalysis.criteria.suddenEvent },
-                          { label: 'Przyczyna zewnętrzna (Art. 13)', data: aiAnalysis.criteria.externalCause },
-                          { label: 'Związek z działalnością (Art. 14)', data: aiAnalysis.criteria.businessConnection }
-                        ].map((item, idx) => (
-                          <div key={idx} className="border border-gray-100 rounded p-4">
-                            <div className="flex justify-between items-center mb-2">
-                              <div className="font-semibold text-gray-800">{item.label}</div>
-                              <div className={`text-xs font-bold px-2 py-1 rounded ${
-                                item.data.score > 0.7 ? 'bg-green-100 text-green-800' : 
-                                item.data.score < 0.3 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                              }`}>
-                                Zgodność: {(item.data.score * 100).toFixed(0)}%
+                  {/* Description */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Opis zdarzenia</div>
+                    <div style={{ 
+                      backgroundColor: '#f8fafc', 
+                      padding: '16px', 
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      color: '#334155',
+                      lineHeight: '1.6'
+                    }}>
+                      {selectedReport.description}
+                    </div>
+                  </div>
+
+                  {/* AI Analysis */}
+                  <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '24px', marginBottom: '24px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0f172a" strokeWidth="2">
+                          <rect x="3" y="3" width="18" height="18" rx="2"/>
+                          <circle cx="8.5" cy="8.5" r="1.5"/>
+                          <circle cx="15.5" cy="8.5" r="1.5"/>
+                          <path d="M9 15h6"/>
+                        </svg>
+                        <span style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a' }}>Analiza AI</span>
+                      </div>
+                      {!aiAnalysis && (
+                        <button
+                          onClick={handleAnalyze}
+                          disabled={isAnalyzing}
+                          style={{
+                            backgroundColor: '#0f172a',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            fontSize: '13px',
+                            fontWeight: '600',
+                            cursor: isAnalyzing ? 'not-allowed' : 'pointer',
+                            opacity: isAnalyzing ? 0.6 : 1
+                          }}
+                        >
+                          {isAnalyzing ? 'Analizuję...' : 'Uruchom analizę'}
+                        </button>
+                      )}
+                    </div>
+
+                    {aiAnalysis && (
+                      <div>
+                        <div style={{
+                          padding: '16px',
+                          borderRadius: '8px',
+                          backgroundColor: aiAnalysis.verdict === 'APPROVE' ? '#f0fdf4' : '#fef2f2',
+                          border: `1px solid ${aiAnalysis.verdict === 'APPROVE' ? '#bbf7d0' : '#fecaca'}`,
+                          marginBottom: '16px'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{
+                              width: '40px',
+                              height: '40px',
+                              borderRadius: '10px',
+                              backgroundColor: aiAnalysis.verdict === 'APPROVE' ? '#dcfce7' : '#fee2e2',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              {aiAnalysis.verdict === 'APPROVE' ? (
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5">
+                                  <path d="M20 6L9 17l-5-5"/>
+                                </svg>
+                              ) : (
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5">
+                                  <path d="M18 6L6 18M6 6l12 12"/>
+                                </svg>
+                              )}
+                            </div>
+                            <div>
+                              <div style={{ 
+                                fontWeight: '600', 
+                                color: aiAnalysis.verdict === 'APPROVE' ? '#166534' : '#991b1b',
+                                fontSize: '14px'
+                              }}>
+                                {aiAnalysis.verdict === 'APPROVE' ? 'Rekomendacja: UZNAĆ' : 'Rekomendacja: ODMÓWIĆ'}
+                              </div>
+                              <div style={{ fontSize: '12px', color: '#64748b' }}>
+                                Pewność: {(aiAnalysis.confidence * 100).toFixed(0)}%
                               </div>
                             </div>
-                            <p className="text-sm text-gray-600">{item.data.reasoning}</p>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                        </div>
 
-                {/* Decision Card */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                  <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                    <h2 className="text-lg font-bold text-gray-800">
-                      Decyzja Końcowa
-                    </h2>
-                  </div>
-                  
-                  <div className="p-6">
-                    <div className="mb-6">
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
-                        Werdykt Urzędnika
-                      </label>
-                      <div className="flex gap-4">
-                        <button
-                          onClick={() => setVerdict('APPROVE')}
-                          className={`flex-1 py-3 px-4 rounded border-2 font-semibold transition-all flex items-center justify-center gap-2 ${
-                            verdict === 'APPROVE'
-                              ? 'bg-green-600 border-green-600 text-white shadow-md'
-                              : 'bg-white border-gray-200 text-gray-600 hover:border-green-300 hover:bg-green-50'
-                          }`}
-                        >
-                          ✅ UZNAĆ
-                        </button>
-                        <button
-                          onClick={() => setVerdict('REJECT')}
-                          className={`flex-1 py-3 px-4 rounded border-2 font-semibold transition-all flex items-center justify-center gap-2 ${
-                            verdict === 'REJECT'
-                              ? 'bg-red-600 border-red-600 text-white shadow-md'
-                              : 'bg-white border-gray-200 text-gray-600 hover:border-red-300 hover:bg-red-50'
-                          }`}
-                        >
-                          ❌ ODMÓWIĆ
-                        </button>
+                        {/* Criteria */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {[
+                            { label: 'Nagłość zdarzenia', val: aiAnalysis.criteria.suddenEvent },
+                            { label: 'Przyczyna zewnętrzna', val: aiAnalysis.criteria.externalCause },
+                            { label: 'Związek z pracą', val: aiAnalysis.criteria.businessConnection },
+                          ].map((c, i) => (
+                            <div key={i} style={{ 
+                              display: 'flex', 
+                              justifyContent: 'space-between', 
+                              alignItems: 'center',
+                              padding: '12px',
+                              backgroundColor: '#f8fafc',
+                              borderRadius: '6px'
+                            }}>
+                              <span style={{ fontSize: '13px', color: '#475569' }}>{c.label}</span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ 
+                                  width: '80px', 
+                                  height: '6px', 
+                                  backgroundColor: '#e2e8f0', 
+                                  borderRadius: '3px',
+                                  overflow: 'hidden'
+                                }}>
+                                  <div style={{
+                                    width: `${c.val.score * 100}%`,
+                                    height: '100%',
+                                    backgroundColor: c.val.score > 0.5 ? '#22c55e' : '#ef4444',
+                                    borderRadius: '3px'
+                                  }}></div>
+                                </div>
+                                <span style={{ fontSize: '12px', fontWeight: '600', color: '#64748b', width: '32px' }}>
+                                  {(c.val.score * 100).toFixed(0)}%
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
+                    )}
+                  </div>
+
+                  {/* Decision Section */}
+                  <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '24px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a', marginBottom: '16px' }}>Twoja decyzja</div>
+                    
+                    <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                      <button
+                        onClick={() => setVerdict('APPROVE')}
+                        style={{
+                          flex: 1,
+                          padding: '14px',
+                          borderRadius: '8px',
+                          border: verdict === 'APPROVE' ? '2px solid #005226' : '2px solid #e2e8f0',
+                          backgroundColor: verdict === 'APPROVE' ? '#005226' : '#fff',
+                          color: verdict === 'APPROVE' ? '#fff' : '#64748b',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        ✓ Uznaj wypadek
+                      </button>
+                      <button
+                        onClick={() => setVerdict('REJECT')}
+                        style={{
+                          flex: 1,
+                          padding: '14px',
+                          borderRadius: '8px',
+                          border: verdict === 'REJECT' ? '2px solid #dc2626' : '2px solid #e2e8f0',
+                          backgroundColor: verdict === 'REJECT' ? '#dc2626' : '#fff',
+                          color: verdict === 'REJECT' ? '#fff' : '#64748b',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        ✗ Odmów uznania
+                      </button>
                     </div>
 
-                    <div className="mb-6">
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                        Uzasadnienie Decyzji
-                      </label>
-                      <textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-[#406835] focus:border-transparent text-sm"
-                        rows={4}
-                        placeholder="Wpisz uzasadnienie decyzji..."
-                      />
-                    </div>
+                    <textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Uzasadnienie decyzji..."
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0',
+                        fontSize: '14px',
+                        minHeight: '80px',
+                        resize: 'vertical',
+                        outline: 'none',
+                        fontFamily: 'inherit',
+                        boxSizing: 'border-box'
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = '#005226'}
+                      onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+                    />
 
                     <button
                       onClick={handleSubmitVerdict}
-                      disabled={isSubmitting || !notes.trim()}
-                      className="w-full bg-gray-800 hover:bg-gray-900 text-white font-semibold py-4 px-6 rounded transition-colors disabled:opacity-50 shadow-sm"
+                      disabled={isSubmitting}
+                      style={{
+                        width: '100%',
+                        marginTop: '16px',
+                        padding: '14px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        backgroundColor: '#0f172a',
+                        color: '#fff',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                        opacity: isSubmitting ? 0.6 : 1,
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => { if (!isSubmitting) e.currentTarget.style.backgroundColor = '#1e293b'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0f172a'; }}
                     >
-                      {isSubmitting ? '⏳ Zapisywanie...' : '✓ Zatwierdź i Zakończ Sprawę'}
+                      {isSubmitting ? 'Zapisywanie...' : 'Zatwierdź decyzję'}
                     </button>
                   </div>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
