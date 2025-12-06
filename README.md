@@ -118,6 +118,11 @@ The AI analyzes three key criteria:
 2. **Przyczyna zewnętrzna** (External Cause): Was the cause external to the body?
 3. **Związek z działalnością** (Business Connection): Was it related to business activity?
 
+## Authors
+
+- Paweł Lach
+- Bartosz Idzik
+
 ## License
 
 Proprietary - HackNation 2025 Project
