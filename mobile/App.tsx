@@ -181,7 +181,7 @@ const ConversationScreen = () => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.header}>
-        <Text style={styles.title}>ZANT</Text>
+        <Text style={styles.title}>Antek E-Okienko</Text>
         <Text style={styles.subtitle}>Zgłoszenie Wypadku przy Pracy</Text>
       </View>
 
@@ -198,17 +198,17 @@ const ConversationScreen = () => {
             style={[
               styles.speakingDot,
               {
-                backgroundColor: conversation.isSpeaking ? '#3B82F6' : '#93C5FD',
+                backgroundColor: conversation.isSpeaking ? '#406835' : '#86EFAC',
               },
             ]}
           />
           <Text
             style={[
               styles.speakingText,
-              { color: conversation.isSpeaking ? '#1E40AF' : '#60A5FA' },
+              { color: conversation.isSpeaking ? '#14532D' : '#166534' },
             ]}
           >
-            {conversation.isSpeaking ? '🎤 Agent mówi...' : '👂 Słucham Cię...'}
+            {conversation.isSpeaking ? '🎤 Asystent mówi...' : '👂 Słucham Cię...'}
           </Text>
         </View>
       )}
@@ -299,147 +299,168 @@ const ConversationScreen = () => {
 export default function App() {
   return (
     <ElevenLabsProvider>
-      <ConversationScreen />
+      <View style={styles.appContainer}>
+        <ConversationScreen />
+      </View>
     </ElevenLabsProvider>
   );
 }
 
 const styles = StyleSheet.create({
+  appContainer: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#EFF6FF', // Light blue background
+    backgroundColor: '#F9FAFB',
   },
   contentContainer: {
     padding: 20,
     paddingTop: 60,
   },
   header: {
+    marginBottom: 30,
     alignItems: 'center',
-    marginBottom: 32,
   },
   title: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#1E3A8A', // Dark blue
-    marginBottom: 4,
+    color: '#406835',
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#3B82F6', // Blue
-    textAlign: 'center',
+    color: '#6B7280',
   },
   statusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24,
-    backgroundColor: '#DBEAFE',
+    backgroundColor: '#FFFFFF',
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     marginRight: 8,
   },
   statusText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#1E40AF',
+    color: '#374151',
   },
   speakingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24,
-    backgroundColor: '#BFDBFE',
-    padding: 12,
+    backgroundColor: '#F0FDF4',
+    padding: 16,
     borderRadius: 12,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
   },
   speakingDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    marginRight: 8,
+    marginRight: 10,
   },
   speakingText: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: '600',
   },
   buttonContainer: {
-    gap: 16,
-    marginBottom: 24,
+    gap: 12,
+    marginBottom: 30,
   },
   button: {
     paddingVertical: 16,
-    paddingHorizontal: 32,
+    paddingHorizontal: 24,
     borderRadius: 12,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   startButton: {
-    backgroundColor: '#3B82F6', // Blue
+    backgroundColor: '#406835',
   },
   endButton: {
-    backgroundColor: '#64748B', // Gray
+    backgroundColor: '#EF4444',
   },
   submitButton: {
-    backgroundColor: '#10B981', // Green
-    marginTop: 8,
+    backgroundColor: '#059669',
+    marginTop: 20,
   },
   disabledButton: {
-    backgroundColor: '#CBD5E1',
+    opacity: 0.5,
   },
   buttonText: {
-    color: 'white',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
   cardPreview: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
-    marginBottom: 24,
-    borderWidth: 2,
-    borderColor: '#3B82F6',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    borderLeftWidth: 4,
+    borderLeftColor: '#406835',
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1E3A8A',
+    color: '#1F2937',
     marginBottom: 16,
   },
   cardRow: {
     flexDirection: 'row',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   cardLabel: {
+    width: 100,
     fontSize: 14,
+    color: '#6B7280',
     fontWeight: '600',
-    color: '#64748B',
-    width: 140,
   },
   cardValue: {
-    fontSize: 14,
-    color: '#1E40AF',
     flex: 1,
+    fontSize: 14,
+    color: '#111827',
   },
   historyContainer: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 12,
+    marginTop: 20,
     padding: 16,
-    marginTop: 8,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
   },
   historyTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#475569',
-    marginBottom: 12,
+    fontWeight: 'bold',
+    color: '#4B5563',
+    marginBottom: 8,
   },
   historyMessage: {
     fontSize: 12,
-    color: '#64748B',
-    marginBottom: 8,
-    lineHeight: 18,
+    color: '#6B7280',
+    marginBottom: 4,
   },
 });

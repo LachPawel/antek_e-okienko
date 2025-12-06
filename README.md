@@ -1,4 +1,4 @@
-# ZANT - ZUS Accident Notification Tool
+# Antek E-Okienko (formerly ZANT)
 
 **HackNation 2025 Hackathon Project**
 
@@ -7,7 +7,8 @@ A dual-interface mobile and web application for streamlining workplace accident 
 ## Architecture
 
 - **Mobile App** (Expo React Native): Voice-first accident reporting for injured persons using Eleven Labs Conversational AI
-- **Backend** (Node.js + Express): REST API with PLLuM-12B-instruct via HuggingFace for legal analysis
+- **Backend** (Node.js + Express): REST API with OpenAI for legal analysis
+- **Dashboard** (React + Vite): ZUS Official Panel for reviewing and processing claims
 - **Dashboard** (Vite React): Web interface for ZUS officials to review and approve/reject accident reports with AI recommendations
 - **Shared** (TypeScript): Common types and utilities
 

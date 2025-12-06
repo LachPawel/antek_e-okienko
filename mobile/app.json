@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ZANT - Zgłoszenie Wypadku",
-    "slug": "zant-mobile",
+    "name": "Antek E-Okienko",
+    "slug": "antek-e-okienko",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
