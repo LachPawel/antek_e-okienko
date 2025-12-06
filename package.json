@@ -1,0 +1,30 @@
+{
+  "name": "zant-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZANT - ZUS Accident Notification Tool for HackNation 2025",
+  "scripts": {
+    "mobile:install": "cd mobile && pnpm install",
+    "mobile:prebuild": "cd mobile && pnpm prebuild",
+    "mobile:ios": "cd mobile && pnpm ios",
+    "mobile:android": "cd mobile && pnpm android",
+    "mobile:start": "cd mobile && pnpm start",
+    "backend:install": "cd backend && pnpm install",
+    "backend:dev": "cd backend && pnpm dev",
+    "backend:build": "cd backend && pnpm build",
+    "dashboard:install": "cd dashboard && pnpm install",
+    "dashboard:dev": "cd dashboard && pnpm dev",
+    "dashboard:build": "cd dashboard && pnpm build",
+    "shared:install": "cd shared && pnpm install",
+    "install:all": "pnpm install && pnpm mobile:install && pnpm backend:install && pnpm dashboard:install && pnpm shared:install",
+    "dev": "concurrently \"pnpm backend:dev\" \"pnpm dashboard:dev\"",
+    "clean": "rm -rf node_modules mobile/node_modules backend/node_modules dashboard/node_modules shared/node_modules"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
