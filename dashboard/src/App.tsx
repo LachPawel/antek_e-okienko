@@ -137,10 +137,10 @@ export default function App() {
       {/* Main Content */}
       <main style={{ padding: '32px', height: 'calc(100vh - 64px)', boxSizing: 'border-box' }}>
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a', marginBottom: '8px', margin: 0, marginBottom: '8px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a', margin: 0, marginBottom: '8px' }}>
             Centrum Decyzyjne
           </h1>
-          <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px', margin: 0, marginBottom: '24px' }}>
+          <p style={{ fontSize: '14px', color: '#64748b', margin: 0, marginBottom: '24px' }}>
             Wybierz zgłoszenie, przeanalizuj i podejmij decyzję.
           </p>
 
