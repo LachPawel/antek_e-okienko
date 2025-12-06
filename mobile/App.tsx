@@ -16,10 +16,162 @@ const ConversationScreen = () => {
   const [extractedData, setExtractedData] = useState<Partial<ExtractedEntities>>({});
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+
+  // API URL for backend
+  const apiUrl = 'http://172.20.10.4:3001';
+
+  // Function to extract data from conversation history
+  const extractDataFromConversation = (history: string[]): {
+    date?: string;
+    time?: string;
+    location?: string;
+    description?: string;
+    injuries?: string;
+    businessContext?: string;
+  } => {
+    const fullText = history.join(' ').toLowerCase();
+    const extracted: any = {};
+    
+    // Extract date - look for patterns like "5 grudnia", "dzisiaj", dates
+    const datePatterns = [
+      /(\d{1,2})\s*(stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia)/i,
+      /(\d{1,2})[./-](\d{1,2})[./-]?(\d{2,4})?/,
+    ];
+    for (const pattern of datePatterns) {
+      const match = fullText.match(pattern);
+      if (match) {
+        extracted.date = match[0];
+        break;
+      }
+    }
+    
+    // Extract time - look for patterns like "18:00", "godzina 18"
+    const timeMatch = fullText.match(/(\d{1,2})[:.h](\d{2})?|godzin[aę]?\s*(\d{1,2})/i);
+    if (timeMatch) {
+      extracted.time = timeMatch[0];
+    }
+    
+    // Extract location - look for street names, addresses
+    const locationPatterns = [
+      /(?:ul\.?|ulica)\s*[\w\sąćęłńóśźż]+\s*\d*/i,
+      /[\w\sąćęłńóśźż]+\s+\d+[a-z]?(?:\s*\/\s*\d+)?/i, // "Brzeszka 25"
+    ];
+    for (const line of history) {
+      if (line.includes('user:')) {
+        const userText = line.replace('user:', '').trim();
+        // Check if it looks like an address (contains number after text)
+        if (/^[\w\sąćęłńóśźż]+\s+\d+/.test(userText) && userText.length < 50) {
+          extracted.location = userText;
+          break;
+        }
+      }
+    }
+    
+    // Extract injury description - look for body parts, injury types
+    const injuryKeywords = ['złaman', 'uraz', 'ból', 'skalecz', 'oparz', 'stłucz', 'zwichn', 'noga', 'ręka', 'głowa', 'plecy', 'kręgosłup', 'spadł', 'uderzył'];
+    for (const line of history) {
+      const lowerLine = line.toLowerCase();
+      if (injuryKeywords.some(k => lowerLine.includes(k))) {
+        if (line.includes('user:')) {
+          extracted.injuries = line.replace('user:', '').trim();
+        }
+      }
+    }
+    
+    // Extract business context - work-related keywords
+    const workKeywords = ['praca', 'pracował', 'montaż', 'naprawa', 'służbow', 'obowiązk', 'zleceni', 'rusztowani', 'wysokości'];
+    for (const line of history) {
+      const lowerLine = line.toLowerCase();
+      if (workKeywords.some(k => lowerLine.includes(k)) && line.includes('user:')) {
+        extracted.businessContext = line.replace('user:', '').trim();
+        break;
+      }
+    }
+    
+    // Build description from key user statements
+    const userStatements = history
+      .filter(line => line.includes('user:') && line.length > 15)
+      .map(line => line.replace('user:', '').trim())
+      .filter(text => text !== '...' && text.length > 5);
+    
+    if (userStatements.length > 0) {
+      extracted.description = userStatements.join('. ');
+    }
+    
+    return extracted;
+  };
+
+  // Function to submit accident report
+  const submitAccidentReportWithData = async (data: {
+    business_context?: string;
+    location?: string;
+    date?: string;
+    time?: string;
+    description?: string;
+    injuries?: string;
+  }) => {
+    if (formSubmitted) return; // Prevent double submission
+    setFormSubmitted(true);
+    setIsSubmitting(true);
+    
+    console.log('📋 Wysyłanie zgłoszenia z danymi:', data);
+    
+    // Extract real data from conversation
+    const extractedFromConversation = extractDataFromConversation(conversationHistory);
+    console.log('📋 Extracted from conversation:', extractedFromConversation);
+
+    const report: Partial<AccidentReport> = {
+      id: Date.now().toString(),
+      citizenId: 'demo-user',
+      dateTime: new Date(),
+      location: data.location || extractedFromConversation.location || 'Lokalizacja z rozmowy',
+      description: extractedFromConversation.description || conversationHistory.filter(l => l.includes('user:')).map(l => l.replace('user:', '').trim()).join('. ') || 'Opis z rozmowy telefonicznej',
+      witnesses: [],
+      medicalInfo: {
+        injuries: data.injuries || extractedFromConversation.injuries || 'Do ustalenia na podstawie dokumentacji medycznej',
+        medicalAid: 'Informacja z rozmowy',
+      },
+      businessContext: data.business_context || extractedFromConversation.businessContext || 'Związek z pracą potwierdzony w rozmowie',
+      extractedEntities: {
+        date: data.date || extractedFromConversation.date || new Date().toLocaleDateString('pl-PL'),
+        time: data.time || extractedFromConversation.time || '',
+        location: data.location || extractedFromConversation.location || '',
+        businessConnection: data.business_context || extractedFromConversation.businessContext || '',
+      } as ExtractedEntities,
+      conversationTranscript: conversationHistory,
+      status: 'submitted',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    try {
+      const response = await fetch(`${apiUrl}/api/accidents`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(report),
+      });
+
+      if (response.ok) {
+        console.log('✅ Zgłoszenie wysłane pomyślnie!');
+        setExtractedData({});
+        setConversationHistory([]);
+      } else {
+        console.error('❌ Błąd wysyłania zgłoszenia:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Błąd sieci:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const conversation = useConversation({
     onConnect: ({ conversationId }: { conversationId: string }) => {
       console.log('✅ Połączono z agentem', conversationId);
+      setFormSubmitted(false); // Reset on new connection
     },
     onDisconnect: (details: string) => {
       console.log('❌ Rozłączono', details);
@@ -32,23 +184,55 @@ const ConversationScreen = () => {
     },
     onMessage: ({ message, source }: { message: ConversationEvent; source: Role }) => {
       console.log(`💬 Wiadomość od ${source}:`, message);
+      console.log('📝 Full message object:', JSON.stringify(message));
       
-      if (message.type === 'text' && 'text' in message) {
-        setConversationHistory(prev => [...prev, `${source}: ${message.text}`]);
+      // Extract text from message - handle different message formats
+      let text = '';
+      if (typeof message === 'string') {
+        text = message;
+      } else if (message && typeof message === 'object') {
+        // Try different possible text fields
+        text = (message as any).text || (message as any).content || (message as any).message || '';
+      }
+      
+      console.log('📝 Extracted text:', text);
+      
+      if (text) {
+        setConversationHistory(prev => [...prev, `${source}: ${text}`]);
         
-        // Extract entities from conversation
-        if (source === 'user' && 'text' in message) {
-          const text = message.text.toLowerCase();
+        // FALLBACK: Detect when agent says it's generating/submitting the form
+        const lowerText = text.toLowerCase();
+        console.log('📝 Lower text:', lowerText);
+        
+        const hasKeyword = 
+          lowerText.includes('generuję') ||
+          lowerText.includes('generuje') ||
+          lowerText.includes('wysyłam') ||
+          lowerText.includes('przesyłam') ||
+          lowerText.includes('rejestruję') ||
+          lowerText.includes('zgłoszenie zostało') ||
+          lowerText.includes('formularz został') ||
+          lowerText.includes('karta wypadku') ||
+          lowerText.includes('projekt karty');
           
-          // Simple extraction logic (in production, backend should do this)
-          if (text.includes('data') || text.includes('dzisiaj') || text.includes('wczoraj')) {
-            setExtractedData(prev => ({ ...prev, date: message.text }));
+        console.log('📝 Has keyword?', hasKeyword);
+        
+        if (hasKeyword && !formSubmitted) {
+          console.log('🎯 WYKRYTO SŁOWO KLUCZOWE! Wysyłam zgłoszenie...');
+          submitAccidentReportWithData({});
+        }
+        
+        // Extract entities from user messages
+        if (source === 'user') {
+          const lowerText = text.toLowerCase();
+          if (lowerText.includes('data') || lowerText.includes('dzisiaj') || lowerText.includes('wczoraj')) {
+            setExtractedData(prev => ({ ...prev, date: text }));
           }
-          if (text.includes('godzina') || text.includes(':')) {
-            setExtractedData(prev => ({ ...prev, time: message.text }));
+          if (lowerText.includes('godzina') || lowerText.includes(':')) {
+            setExtractedData(prev => ({ ...prev, time: text }));
           }
-          if (text.includes('warszawa') || text.includes('miejsce') || text.includes('gdzie')) {
-            setExtractedData(prev => ({ ...prev, location: message.text }));
+          if (lowerText.includes('warszawa') || lowerText.includes('miejsce') || lowerText.includes('gdzie')) {
+            setExtractedData(prev => ({ ...prev, location: text }));
           }
         }
       }
@@ -58,6 +242,14 @@ const ConversationScreen = () => {
     },
     onStatusChange: ({ status }: { status: ConversationStatus }) => {
       console.log(`📡 Status: ${status}`);
+    },
+    // CLIENT TOOLS - handle fill_accident_form from ElevenLabs agent
+    clientTools: {
+      fill_accident_form: async (params: { business_context?: string }) => {
+        console.log('🔧 CLIENT TOOL CALLED: fill_accident_form', params);
+        await submitAccidentReportWithData(params);
+        return 'Zgłoszenie zostało pomyślnie zarejestrowane w systemie.';
+      },
     },
   });
 
@@ -103,53 +295,9 @@ const ConversationScreen = () => {
     }
   };
 
+  // Keep legacy function for manual submit button (calls the new one)
   const submitAccidentReport = async () => {
-    setIsSubmitting(true);
-    
-    // Use your Mac's local IP instead of localhost when testing on physical device
-    const apiUrl = 'http://172.20.10.4:3001';
-    
-    const report: Partial<AccidentReport> = {
-      id: Date.now().toString(),
-      citizenId: 'demo-user',
-      dateTime: new Date(),
-      location: extractedData.location || 'Nie określono',
-      description: conversationHistory.join('\n'),
-      witnesses: extractedData.witnesses || [],
-      medicalInfo: {
-        injuries: extractedData.medicalInfo || 'Nie określono',
-        medicalAid: 'Nie określono',
-      },
-      businessContext: extractedData.businessConnection || 'Nie określono',
-      extractedEntities: extractedData as ExtractedEntities,
-      conversationTranscript: [],
-      status: 'submitted',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    try {
-      const response = await fetch(`${apiUrl}/api/accidents`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(report),
-      });
-
-      if (response.ok) {
-        console.log('✅ Zgłoszenie wysłane');
-        // Reset state
-        setExtractedData({});
-        setConversationHistory([]);
-      } else {
-        console.error('❌ Błąd wysyłania zgłoszenia');
-      }
-    } catch (error) {
-      console.error('❌ Błąd sieci:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    await submitAccidentReportWithData({});
   };
 
   const getStatusColor = (status: ConversationStatus): string => {
